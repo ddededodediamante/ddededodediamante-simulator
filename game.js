@@ -1,4 +1,6 @@
 function startGame() {
+    const gameStartDate = new Date().getTime();
+
     document.body.style.padding = '0';
 
     const canvas = document.getElementById('gameCanvas');
@@ -38,7 +40,8 @@ function startGame() {
 
     var gameStopped = false;
     var globalId = 0;
-    var rainDelay = 1000;
+    var rainDelay = 700;
+    var timer = 0;
     const entities = {};
     const keys = {};
 
@@ -140,8 +143,8 @@ function startGame() {
 
         entities[globalId] = {
             type: type,
-            x: getRandom(20, canvas.width - 20),
-            y: 20,
+            x: getRandom(width, canvas.width - width),
+            y: 0,
             width: width,
             height: height
         };
@@ -152,8 +155,9 @@ function startGame() {
             return;
         }
 
-        if (rainDelay > 200) rainDelay = Math.round(rainDelay * 0.992);
-        else rainDelay = 200;
+        if (rainDelay > 250) rainDelay = Math.round(rainDelay * 0.993);
+        else if (rainDelay > 150) rainDelay -= 1;
+        else rainDelay = 100;
 
         spawnEntity('rain', 20, 20);
 
@@ -181,10 +185,16 @@ function startGame() {
         drawEntities();
         drawPlayer();
 
+        if (!gameStopped) {
+            let now = new Date().getTime();
+            timer = (((now - gameStartDate) % 60000) / 1000).toFixed(2);
+        }
+
         ctx.font = '25px Arial';
         ctx.fillStyle = 'black';
         ctx.fillText('Rain delay: ' + rainDelay + 'ms', 8, 30);
         ctx.fillText('Player speed: ' + player.speed, 8, 55);
+        ctx.fillText('Time survived: ' + timer + 's', 8, 80);
 
         requestAnimationFrame(gameLoop);
     }
