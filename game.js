@@ -65,7 +65,6 @@ function startGame() {
             objA.y + objA.height > objB.y;
     }
 
-
     function drawPlayer() {
         if (player.x + player.dx > 0 && player.x + player.dx + player.width < canvas.width) {
             player.x += player.dx;
@@ -101,6 +100,9 @@ function startGame() {
                     ctx.fillRect(entity.x, entity.y, entity.width, entity.height);
 
                     if (colliding(entity, player)) {
+                        let now = new Date().getTime();
+                        timer = (((now - gameStartDate) % 60000) / 1000).toFixed(2);
+
                         window.alert('ahhhh');
                         gameStopped = true;
                     }
@@ -195,6 +197,8 @@ function startGame() {
         ctx.fillText('Rain delay: ' + rainDelay + 'ms', 8, 30);
         ctx.fillText('Player speed: ' + player.speed, 8, 55);
         ctx.fillText('Time survived: ' + timer + 's', 8, 80);
+
+        if (gameStopped) return;
 
         requestAnimationFrame(gameLoop);
     }
