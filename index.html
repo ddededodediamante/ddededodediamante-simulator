@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Canvas Game</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background: #addeff;
+            margin: 0;
+            padding: 5px;
+            overflow: hidden;
+        }
+
+        ul {
+            list-style-position: outside;
+        }
+
+        #gameCanvas {
+            display: none;
+            width: 100%;
+            height: 100%;
+        }
+
+        #gameCanvas.shown {
+            background: #3ca7ee;
+            display: block;
+        }
+
+        #mainMenu {
+            font-size: larger;
+        }
+
+        #mainMenu h1 {
+            background: linear-gradient(90deg, rgb(223, 0, 0), orange, rgb(240, 240, 19), rgb(0, 233, 0), rgb(18, 18, 214), rgb(142, 0, 236), rgb(255, 0, 157));
+            border-radius: 10px;
+            padding: 5px;
+        }
+
+        #mainMenu.hidden {
+            display: none !important;
+        }
+
+        #mainMenu button {
+            border-radius: 6px;
+            border: 1px solid #9c9c9c;
+            background-color: #e7e7e7;
+            transition: all 0.2s ease;
+            font-size: larger;
+        }
+
+        #mainMenu button:hover {
+            cursor: pointer;
+            border-radius: 3px;
+            border-color: #8b8b8b;
+            background-color: #d1d1d1;
+        }
+
+        #mainMenu button:active {
+            scale: 0.95;
+        }
+    </style>
+
+    <script src="game.js"></script>
+</head>
+
+<body>
+    <div id="mainMenu">
+        <h1>ddededodediamante simulator</h1>
+
+        <h2>Some stuff you should know:</h2>
+        <ul>
+            <li>Red = bad</li>
+            <li>Cat = power-up</li>
+        </ul>
+
+        <button id="buttonStart" onclick="startGame()">Start Game</button>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+</body>
+
+</html>
