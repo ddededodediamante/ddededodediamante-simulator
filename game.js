@@ -42,6 +42,8 @@ function startGame() {
     var globalId = 0;
     var rainDelay = 700;
     var timer = 0;
+    var now;
+
     const entities = {};
     const keys = {};
 
@@ -100,8 +102,7 @@ function startGame() {
                     ctx.fillRect(entity.x, entity.y, entity.width, entity.height);
 
                     if (colliding(entity, player)) {
-                        let now = new Date().getTime();
-                        timer = (((now - gameStartDate) % 60000) / 1000).toFixed(2);
+                        now = new Date().getTime();
 
                         window.alert('ahhhh');
                         gameStopped = true;
@@ -188,9 +189,10 @@ function startGame() {
         drawPlayer();
 
         if (!gameStopped) {
-            let now = new Date().getTime();
-            timer = (((now - gameStartDate) % 60000) / 1000).toFixed(2);
+            now = new Date().getTime();
         }
+
+        timer = (((now - gameStartDate) % 60000) / 1000).toFixed(2);
 
         ctx.font = '25px Arial';
         ctx.fillStyle = 'black';
