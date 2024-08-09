@@ -4,8 +4,6 @@ function startGame() {
     var gameMode = 'normal';
     if (gameModeElement.value) var gameMode = gameModeElement.value;
 
-    const gameStartDate = new Date().getTime();
-
     document.body.style.padding = '0';
 
     const canvas = document.getElementById('gameCanvas');
@@ -48,7 +46,8 @@ function startGame() {
     var rainDelay = 700;
     var timer = 0;
     var frameCounter = 0;
-    var now;
+    var lastFrameTime = performance.now();
+    var fps = 60;
 
     const entities = {};
     const keys = {};
@@ -153,6 +152,8 @@ function startGame() {
     }
 
     function spawnEntity(type, width, height) {
+        if (!(type && width && height)) return
+
         globalId++;
 
         entities[globalId] = {
@@ -206,17 +207,19 @@ function startGame() {
         drawPlayer(canDrawFrame);
 
         if (!gameStopped) {
-            now = new Date().getTime();
+            let now = performance.now();
+            let deltaTime = now - lastFrameTime;
+            lastFrameTime = now;
+            fps = Math.round(1000 / deltaTime);
         }
-
-        timer = (((now - gameStartDate) % 60000) / 1000).toFixed(2);
 
         if (canDrawFrame) {
             ctx.font = '25px Arial';
             ctx.fillStyle = 'black';
-            ctx.fillText('Rain delay: ' + rainDelay + 'ms', 8, 30);
-            ctx.fillText('Player speed: ' + player.speed, 8, 55);
-            ctx.fillText('Time survived: ' + timer + 's', 8, 80);
+            ctx.fillText('FPS: ' + fps, 8, 30);
+            ctx.fillText('Rain delay: ' + rainDelay + 'ms', 8, 55);
+            ctx.fillText('Player speed: ' + player.speed, 8, 80);
+            ctx.fillText('Time survived: ' + timer.toFixed(2) + 's', 8, 105);
         }
 
         if (gameStopped) return;
@@ -226,6 +229,17 @@ function startGame() {
         requestAnimationFrame(gameLoop);
     }
 
+    function updateTimer() {
+        if (gameStopped) {
+            return;
+        } else if (document.hasFocus()) {
+            timer += 0.06;
+        }
+
+        setTimeout(updateTimer, 60);
+    }
+
     gameLoop();
     createRain();
+    updateTimer();
 }
