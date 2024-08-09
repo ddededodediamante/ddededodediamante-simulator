@@ -1,4 +1,9 @@
 function startGame() {
+    let gameModeElement = document.getElementById('gameMode');
+
+    var gameMode = 'normal';
+    if (gameModeElement.value) var gameMode = gameModeElement.value;
+
     const gameStartDate = new Date().getTime();
 
     document.body.style.padding = '0';
@@ -42,6 +47,7 @@ function startGame() {
     var globalId = 0;
     var rainDelay = 700;
     var timer = 0;
+    var frameCounter = 0;
     var now;
 
     const entities = {};
@@ -67,7 +73,7 @@ function startGame() {
             objA.y + objA.height > objB.y;
     }
 
-    function drawPlayer() {
+    function drawPlayer(render = true) {
         if (player.x + player.dx > 0 && player.x + player.dx + player.width < canvas.width) {
             player.x += player.dx;
         } else {
@@ -84,12 +90,13 @@ function startGame() {
             }
         }
 
-        let calcX = player.x - (player.imgwidth - player.width) / 2;
+        if (!render) return;
 
+        let calcX = player.x - (player.imgwidth - player.width) / 2;
         ctx.drawImage(player.image, calcX, player.y, player.imgwidth, player.imgheight);
     }
 
-    function drawEntities() {
+    function drawEntities(render = true) {
         for (let key in entities) {
             const entity = entities[key];
 
@@ -98,8 +105,10 @@ function startGame() {
 
                 if (entity.y >= canvas.height + 20) delete entities[key];
                 else {
-                    ctx.fillStyle = 'red';
-                    ctx.fillRect(entity.x, entity.y, entity.width, entity.height);
+                    if (render) {
+                        ctx.fillStyle = 'red';
+                        ctx.fillRect(entity.x, entity.y, entity.width, entity.height);
+                    }
 
                     if (colliding(entity, player)) {
                         now = new Date().getTime();
@@ -113,7 +122,9 @@ function startGame() {
 
                 if (entity.y >= canvas.height + 20) delete entities[key];
                 else {
-                    ctx.drawImage(catImg, entity.x, entity.y, entity.width, entity.height);
+                    if (render) {
+                        ctx.drawImage(catImg, entity.x, entity.y, entity.width, entity.height);
+                    }
 
                     if (colliding(entity, player)) {
                         delete entities[key];
@@ -183,10 +194,16 @@ function startGame() {
             player.dx = player.speed;
         }
 
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (gameMode === 'lag') {
+            var canDrawFrame = frameCounter % 7 == 0;
+        } else {
+            var canDrawFrame = true;
+        }
 
-        drawEntities();
-        drawPlayer();
+        if (canDrawFrame) ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        drawEntities(canDrawFrame);
+        drawPlayer(canDrawFrame);
 
         if (!gameStopped) {
             now = new Date().getTime();
@@ -194,13 +211,17 @@ function startGame() {
 
         timer = (((now - gameStartDate) % 60000) / 1000).toFixed(2);
 
-        ctx.font = '25px Arial';
-        ctx.fillStyle = 'black';
-        ctx.fillText('Rain delay: ' + rainDelay + 'ms', 8, 30);
-        ctx.fillText('Player speed: ' + player.speed, 8, 55);
-        ctx.fillText('Time survived: ' + timer + 's', 8, 80);
+        if (canDrawFrame) {
+            ctx.font = '25px Arial';
+            ctx.fillStyle = 'black';
+            ctx.fillText('Rain delay: ' + rainDelay + 'ms', 8, 30);
+            ctx.fillText('Player speed: ' + player.speed, 8, 55);
+            ctx.fillText('Time survived: ' + timer + 's', 8, 80);
+        }
 
         if (gameStopped) return;
+
+        frameCounter++;
 
         requestAnimationFrame(gameLoop);
     }
