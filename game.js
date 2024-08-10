@@ -1,31 +1,41 @@
 function startGame() {
-    let gameModeElement = document.getElementById('gameMode');
-
-    var gameMode = 'normal';
-    if (gameModeElement.value) gameMode = gameModeElement.value;
-
-    document.body.style.padding = '0';
-
     const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
     canvas.classList.add('shown');
+    document.getElementById('mainMenu').classList.add('hidden');
+    document.body.style.padding = 0;
+
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    document.getElementById('mainMenu').classList.add('hidden');
-
-    const ctx = canvas.getContext('2d');
     ctx.imageSmoothingEnabled = false;
     ctx.textRendering = "optimizeSpeed";
 
-    let playerImg = new Image();
+    const playerImg = new Image();
     playerImg.src = 'src/images/ddededodediamante.png';
 
-    let catImg = new Image();
+    const catImg = new Image();
     catImg.src = 'src/images/alpacalli_cat.png';
 
-    const jumpSound = new Audio('src/sounds/boing.mp3');
+    const jumpSound = new Audio('src/sounds/boing.wav');
     const meowSound = new Audio('src/sounds/meow.mp3');
     const owieSound = new Audio('src/sounds/owie.wav');
+
+    function playSound(sound) {
+        const audioMap = {
+            'jump': jumpSound,
+            'meow': meowSound,
+            'owie': owieSound
+        };
+
+        const audio = audioMap[sound];
+
+        if (audio) {
+            audio.currentTime = 0;
+            audio.play();
+        }
+    }
 
     const player = {
         x: canvas.width / 2,
@@ -43,29 +53,19 @@ function startGame() {
         image: playerImg
     };
 
-    playerImg = null;
-
+    const entities = {};
+    const keys = {};
     var gameStopped = false;
     var globalId = 0;
     var rainDelay = 700;
     var timer = 0;
-    var frameCounter = 0;
     var lastFrameTime = performance.now();
     var fps = 60;
 
-    const entities = {};
-    const keys = {};
-
-    document.addEventListener('keydown', function (event) {
-        keys[event.code] = true;
-    });
-
-    document.addEventListener('keyup', function (event) {
-        keys[event.code] = false;
-    });
+    document.addEventListener('keydown', event => keys[event.code] = true);
+    document.addEventListener('keyup', event => keys[event.code] = false);
 
     function getRandom(min, max) {
-        if (min > max) [min, max] = [max, min];
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
@@ -76,7 +76,7 @@ function startGame() {
             objA.y + objA.height > objB.y;
     }
 
-    function drawPlayer(render = true) {
+    function drawPlayer() {
         if (player.x + player.dx > 0 && player.x + player.dx + player.width < canvas.width) {
             player.x += player.dx;
         } else {
@@ -87,80 +87,72 @@ function startGame() {
             player.y += player.dy;
         } else {
             player.dy = 0;
-
-            if (keys['KeyW'] & player.dy <= 0) {
+            if (keys['KeyW'] && player.dy <= 0) {
                 player.dy = -13;
-                jumpSound.play();
+
+                playSound('jump');
             }
         }
-
-        if (!render) return;
 
         let calcX = player.x - (player.imgwidth - player.width) / 2;
         ctx.drawImage(player.image, calcX, player.y, player.imgwidth, player.imgheight);
     }
 
-    function drawEntities(render = true) {
+    function drawEntities() {
         for (let key in entities) {
             const entity = entities[key];
 
-            if (entity.type == 'rain') {
+            if (entity.type === 'rain') {
                 entity.y += 3;
 
-                if (entity.y >= canvas.height + 20) delete entities[key];
-                else {
-                    if (render) {
-                        ctx.fillStyle = 'red';
-                        ctx.fillRect(entity.x, entity.y, entity.width, entity.height);
-                    }
+                if (entity.y >= canvas.height + 20) {
+                    delete entities[key];
+                } else {
+                    ctx.fillStyle = 'red';
+                    ctx.fillRect(entity.x, entity.y, entity.width, entity.height);
 
                     if (colliding(entity, player)) {
-                        owieSound.play();
-                        window.alert('ahhhh');
+                        playSound('owie');
+
                         gameStopped = true;
+
+                        window.alert('ahhhh');
                     }
-                };
-            } else if (entity.type == 'catCollectible') {
+                }
+            } else if (entity.type === 'catCollectible') {
                 entity.y += 5;
 
-                if (entity.y >= canvas.height + 20) delete entities[key];
-                else {
-                    if (render) {
-                        ctx.drawImage(catImg, entity.x, entity.y, entity.width, entity.height);
-                    }
+                if (entity.y >= canvas.height + 20) {
+                    delete entities[key];
+                } else {
+                    ctx.drawImage(catImg, entity.x, entity.y, entity.width, entity.height);
 
                     if (colliding(entity, player)) {
                         delete entities[key];
-                        meowSound.play();
 
-                        player.speed += 3;
+                        playSound('meow');
 
+                        player.speed += 2;
                         player.width *= 0.95;
                         player.imgwidth *= 0.95;
-
                         player.height *= 0.95;
                         player.imgheight *= 0.95;
 
                         setTimeout(() => {
-                            player.speed -= 3, 9000;
-
+                            player.speed -= 2;
                             player.width *= 1.0526315789473684;
                             player.imgwidth *= 1.0526315789473684;
-
                             player.height *= 1.0526315789473684;
                             player.imgheight *= 1.0526315789473684;
                         }, 8000);
                     }
-                };
+                }
             }
         }
     }
 
     function spawnEntity(type, width, height) {
-        if (!(type && width && height)) return
-
         globalId++;
-
         entities[globalId] = {
             type: type,
             x: getRandom(width, canvas.width - width),
@@ -171,25 +163,22 @@ function startGame() {
     }
 
     function createRain() {
-        if (gameStopped) {
-            return;
-        }
+        if (gameStopped) return;
+
+        spawnEntity('rain', 20, 20);
+        if (getRandom(0, 20) === 20) spawnEntity('catCollectible', 40, 50);
 
         if (rainDelay > 250) rainDelay = Math.round(rainDelay * 0.993);
         else if (rainDelay > 150) rainDelay -= 1;
-        else rainDelay = 100;
-
-        spawnEntity('rain', 20, 20);
-
-        if (getRandom(0, 20) == 20) spawnEntity('catCollectible', 40, 50);
+        else rainDelay = 150;
 
         setTimeout(createRain, rainDelay);
     }
 
     function gameLoop() {
-        if (gameStopped) {
-            return;
-        }
+        if (gameStopped) return;
+
+        var focused = document.hasFocus();
 
         player.dx *= 0.7;
         player.dy += player.gravity;
@@ -200,25 +189,21 @@ function startGame() {
             player.dx = player.speed;
         }
 
-        if (gameMode === 'lag') {
-            var canDrawFrame = frameCounter % 7 == 0;
-        } else {
-            var canDrawFrame = true;
-        }
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        if (canDrawFrame) ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawEntities();
+        drawPlayer();
 
-        drawEntities(canDrawFrame);
-        drawPlayer(canDrawFrame);
+        var now = performance.now();
+        var deltaTime = now - lastFrameTime;
+        fps = Math.round(1000 / deltaTime);
+        lastFrameTime = now;
 
-        if (!gameStopped) {
-            let now = performance.now();
-            let deltaTime = now - lastFrameTime;
-            lastFrameTime = now;
-            fps = Math.round(1000 / deltaTime);
-        }
+        if (focused) {
+            if (!gameStopped) {
+                timer += deltaTime / 1000;
+            }
 
-        if (canDrawFrame) {
             ctx.font = '25px Arial';
             ctx.fillStyle = 'black';
             ctx.fillText('FPS: ' + fps, 8, 30);
@@ -227,24 +212,9 @@ function startGame() {
             ctx.fillText('Time survived: ' + timer.toFixed(2) + 's', 8, 105);
         }
 
-        if (gameStopped) return;
-
-        frameCounter++;
-
         requestAnimationFrame(gameLoop);
-    }
-
-    function updateTimer() {
-        if (gameStopped) {
-            return;
-        } else if (document.hasFocus()) {
-            timer += 0.06;
-        }
-
-        setTimeout(updateTimer, 60);
     }
 
     gameLoop();
     createRain();
-    updateTimer();
 }
