@@ -23,6 +23,10 @@ function startGame() {
     let catImg = new Image();
     catImg.src = 'src/images/alpacalli_cat.png';
 
+    const jumpSound = new Audio('src/sounds/boing.mp3');
+    const meowSound = new Audio('src/sounds/meow.mp3');
+    const owieSound = new Audio('src/sounds/owie.wav');
+
     const player = {
         x: canvas.width / 2,
         y: canvas.height - 466 / 4,
@@ -85,7 +89,8 @@ function startGame() {
             player.dy = 0;
 
             if (keys['KeyW'] & player.dy <= 0) {
-                player.dy = -13
+                player.dy = -13;
+                jumpSound.play();
             }
         }
 
@@ -110,8 +115,7 @@ function startGame() {
                     }
 
                     if (colliding(entity, player)) {
-                        now = new Date().getTime();
-
+                        owieSound.play();
                         window.alert('ahhhh');
                         gameStopped = true;
                     }
@@ -127,6 +131,7 @@ function startGame() {
 
                     if (colliding(entity, player)) {
                         delete entities[key];
+                        meowSound.play();
 
                         player.speed += 3;
 
