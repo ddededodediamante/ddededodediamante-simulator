@@ -2,7 +2,7 @@ function startGame() {
     let gameModeElement = document.getElementById('gameMode');
 
     var gameMode = 'normal';
-    if (gameModeElement.value) var gameMode = gameModeElement.value;
+    if (gameModeElement.value) gameMode = gameModeElement.value;
 
     document.body.style.padding = '0';
 
