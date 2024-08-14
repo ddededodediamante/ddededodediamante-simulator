@@ -1,4 +1,37 @@
+const ddededodediamanteImg = new Image();
+ddededodediamanteImg.src = 'src/images/ddededodediamante.png';
+
+const catImg = new Image()
+catImg.src = 'src/images/alpacalli_cat.png';
+const catImg2 = new Image()
+catImg2.src = 'src/images/gen1x_cat.png';
+
+const jumpSound = new Audio('src/sounds/boing.wav');
+const meowSound = new Audio('src/sounds/meow.mp3');
+const owieSound = new Audio('src/sounds/owie.wav');
+const ddededodediamanteSound = new Audio('src/sounds/ddededodediamante.mp3');
+
+ddededodediamanteSound.onloadeddata = () => {
+    document.getElementById('startGameButton').disabled = false;
+};
+
+function getRandom(min, max) {
+    if (min > max) {
+        let tmp = max;
+        max = min;
+        min = tmp;
+    }
+
+    if (!Number.isInteger(min) || !Number.isInteger(max)) {
+        return Math.random() * (max - min) + min;
+    } else {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+}
+
 function startGame() {
+    ddededodediamanteSound.play();
+
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
@@ -12,16 +45,6 @@ function startGame() {
     ctx.imageSmoothingEnabled = false;
     ctx.textRendering = "optimizeSpeed";
 
-    const playerImg = new Image();
-    playerImg.src = 'src/images/ddededodediamante.png';
-
-    const catImg = new Image();
-    catImg.src = 'src/images/alpacalli_cat.png';
-
-    const jumpSound = new Audio('src/sounds/boing.wav');
-    const meowSound = new Audio('src/sounds/meow.mp3');
-    const owieSound = new Audio('src/sounds/owie.wav');
-
     function playSound(sound) {
         const audioMap = {
             'jump': jumpSound,
@@ -31,7 +54,7 @@ function startGame() {
 
         const audio = audioMap[sound];
 
-        if (audio) {
+        if (sound && audio) {
             audio.currentTime = 0;
             audio.play();
         }
@@ -50,11 +73,12 @@ function startGame() {
         gravity: 0.8,
         jumpPower: -15,
         isJumping: false,
-        image: playerImg
+        image: ddededodediamanteImg
     };
 
     const entities = {};
     const keys = {};
+
     var gameStopped = false;
     var globalId = 0;
     var rainDelay = 700;
@@ -64,10 +88,6 @@ function startGame() {
 
     document.addEventListener('keydown', event => keys[event.code] = true);
     document.addEventListener('keyup', event => keys[event.code] = false);
-
-    function getRandom(min, max) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
 
     function colliding(objA, objB) {
         return objA.x < objB.x + objB.width &&
@@ -116,7 +136,9 @@ function startGame() {
 
                         gameStopped = true;
 
-                        window.alert('ahhhh');
+                        setTimeout(function () {
+                            window.alert('ahhhh');
+                        }, 500);
                     }
                 }
             } else if (entity.type === 'catCollectible') {
@@ -125,7 +147,7 @@ function startGame() {
                 if (entity.y >= canvas.height + 20) {
                     delete entities[key];
                 } else {
-                    ctx.drawImage(catImg, entity.x, entity.y, entity.width, entity.height);
+                    ctx.drawImage(entity.image || catImg2, entity.x, entity.y, entity.width, entity.height);
 
                     if (colliding(entity, player)) {
                         delete entities[key];
@@ -151,14 +173,15 @@ function startGame() {
         }
     }
 
-    function spawnEntity(type, width, height) {
+    function spawnEntity(type, width, height, image) {
         globalId++;
         entities[globalId] = {
             type: type,
             x: getRandom(width, canvas.width - width),
             y: 0,
             width: width,
-            height: height
+            height: height,
+            image: image
         };
     }
 
@@ -166,7 +189,15 @@ function startGame() {
         if (gameStopped) return;
 
         spawnEntity('rain', 20, 20);
-        if (getRandom(0, 20) === 20) spawnEntity('catCollectible', 40, 50);
+
+        if (getRandom(0, 20) === 20) {
+            spawnEntity(
+                'catCollectible',
+                40,
+                50,
+                getRandom(0, 1) == 0 ? catImg : catImg2
+            );
+        }
 
         if (rainDelay > 250) rainDelay = Math.round(rainDelay * 0.993);
         else if (rainDelay > 150) rainDelay -= 1;
