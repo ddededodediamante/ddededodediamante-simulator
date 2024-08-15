@@ -1,0 +1,90 @@
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    background: #6ebdf1;
+    margin: 0;
+    padding: 5px;
+    list-style-position: inside;
+
+    text-rendering: optimizeSpeed;
+    image-rendering: optimizeSpeed;
+    shape-rendering: optimizeSpeed;
+}
+
+#gameCanvas {
+    display: none;
+    width: 100%;
+    height: 100%;
+}
+
+#gameCanvas.shown {
+    background: #3ca7ee;
+    display: block;
+}
+
+#mainMenu {
+    display: flex;
+    flex-direction: column;
+    font-size: larger;
+    text-align: center;
+}
+
+#mainMenu h1 {
+    background: linear-gradient(90deg, rgb(223, 0, 0), orange, rgb(240, 240, 19), rgb(0, 233, 0), rgb(18, 18, 214), rgb(142, 0, 236), rgb(255, 0, 157));
+    border-radius: 10px;
+    padding: 5px;
+}
+
+#mainMenu.hidden {
+    display: none !important;
+}
+
+#mainMenu button,
+select {
+    border-radius: 6px;
+    border: 1px solid #9c9c9c;
+    background-color: #e7e7e7;
+    transition: all 0.2s ease;
+    font-size: 19px;
+}
+
+#mainMenu button:hover,
+#mainMenu select:hover {
+    cursor: pointer;
+    border-radius: 3px;
+    border-color: #7e868b;
+    background-color: #becad1;
+}
+
+#mainMenu #mainMenuContent {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: center;
+    gap: 50px
+}
+
+#mainMenu ul {
+    text-align: left;
+    background-color: rgba(23, 123, 255, 0.5);
+    padding: 10px;
+    border-radius: 10px;
+}
+
+@keyframes balanceSpin {
+    0% {
+        transform: rotate(-10deg);
+    }
+
+    50% {
+        transform: rotate(10deg);
+    }
+
+    100% {
+        transform: rotate(-10deg);
+    }
+}
+
+.ddededodediamante {
+    width: 200px;
+    animation: balanceSpin 4s ease infinite;
+}

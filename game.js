@@ -85,6 +85,7 @@ function startGame() {
     var timer = 0;
     var lastFrameTime = performance.now();
     var fps = 60;
+    var deltatimeMulti = 1;
 
     document.addEventListener('keydown', event => keys[event.code] = true);
     document.addEventListener('keyup', event => keys[event.code] = false);
@@ -97,16 +98,21 @@ function startGame() {
     }
 
     function drawPlayer() {
-        if (player.x + player.dx > 0 && player.x + player.dx + player.width < canvas.width) {
-            player.x += player.dx;
+        let playerdx = player.dx * deltatimeMulti;
+
+        if (player.x + playerdx > 0 && player.x + playerdx + player.width < canvas.width) {
+            player.x += playerdx;
         } else {
             player.dx = 0;
         }
 
-        if (player.y + player.dy > 0 && player.y + player.dy + player.height < canvas.height) {
-            player.y += player.dy;
+        let playerdy = player.dy * deltatimeMulti;
+
+        if (player.y + playerdy > 0 && player.y + playerdy + player.height < canvas.height) {
+            player.y += playerdy;
         } else {
             player.dy = 0;
+
             if (keys['KeyW'] && player.dy <= 0) {
                 player.dy = -13;
 
@@ -123,7 +129,7 @@ function startGame() {
             const entity = entities[key];
 
             if (entity.type === 'rain') {
-                entity.y += 3;
+                entity.y += 3 * deltatimeMulti;
 
                 if (entity.y >= canvas.height + 20) {
                     delete entities[key];
@@ -142,7 +148,7 @@ function startGame() {
                     }
                 }
             } else if (entity.type === 'catCollectible') {
-                entity.y += 5;
+                entity.y += 5 * deltatimeMulti;
 
                 if (entity.y >= canvas.height + 20) {
                     delete entities[key];
@@ -191,12 +197,7 @@ function startGame() {
         spawnEntity('rain', 20, 20);
 
         if (getRandom(0, 20) === 20) {
-            spawnEntity(
-                'catCollectible',
-                40,
-                50,
-                getRandom(0, 1) == 0 ? catImg : catImg2
-            );
+            spawnEntity('catCollectible', 40, 50, getRandom(0, 1) == 0 ? catImg : catImg2);
         }
 
         if (rainDelay > 250) rainDelay = Math.round(rainDelay * 0.993);
@@ -209,10 +210,16 @@ function startGame() {
     function gameLoop() {
         if (gameStopped) return;
 
+        var now = performance.now();
+        var deltaTime = now - lastFrameTime;
+        fps = Math.round(1000 / deltaTime);
+        deltatimeMulti = (1000 / deltaTime) / 60;
+        lastFrameTime = now;
+
         var focused = document.hasFocus();
 
         player.dx *= 0.7;
-        player.dy += player.gravity;
+        player.dy += player.gravity * deltatimeMulti;
 
         if (keys['KeyA']) {
             player.dx = -player.speed;
@@ -224,11 +231,6 @@ function startGame() {
 
         drawEntities();
         drawPlayer();
-
-        var now = performance.now();
-        var deltaTime = now - lastFrameTime;
-        fps = Math.round(1000 / deltaTime);
-        lastFrameTime = now;
 
         if (focused) {
             if (!gameStopped) {
