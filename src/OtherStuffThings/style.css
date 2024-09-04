@@ -1,0 +1,13 @@
+#game {
+    font-family: 'Comic Sans MS', Tahoma, Arial, sans-serif;
+}
+
+.thing-icon,
+.particle {
+    width: min-content;
+    height: min-content;
+}
+
+#game.filtersOn .thing.cantAfford.notOwned {
+    filter: blur(2px);
+}
